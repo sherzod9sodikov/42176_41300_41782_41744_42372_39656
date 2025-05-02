@@ -1,0 +1,58 @@
+.dashboard-page {
+  max-width: 900px;
+  margin: auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.currency-selector {
+  margin-bottom: 1rem;
+}
+
+.currency-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.currency-table th,
+.currency-table td {
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  cursor: pointer;
+}
+
+.currency-table tr:hover {
+  background-color: #f0f0f0;
+}
+
+.currency-graph {
+  margin-top: 2rem;
+  background: #fff;
+  padding: 1rem;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+}
+
+.chart-placeholder {
+  height: 200px;
+  border: 1px dashed #aaa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #777;
+}
+
+.dashboard-buttons button {
+  margin: 1rem 0.5rem;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 8px;
+  background: #4a90e2;
+  color: white;
+  cursor: pointer;
+}
+
+dashboard-buttons button:hover {
+  background: #3a78c2;
+}

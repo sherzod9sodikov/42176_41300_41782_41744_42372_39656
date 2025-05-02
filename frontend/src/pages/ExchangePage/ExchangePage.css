@@ -1,0 +1,44 @@
+.exchange-page {
+  max-width: 600px;
+  margin: 5vh auto;
+  padding: 2rem;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.exchange-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin: 2rem 0;
+}
+
+.input-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+}
+
+.input-group select,
+.input-group input {
+  padding: 0.75rem;
+  font-size: 1rem;
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+.exchange-result {
+  margin-top: 2rem;
+  font-size: 1.25rem;
+  color: #333;
+  font-weight: bold;
+}
+
+.converted-value {
+  font-size: 2rem;
+  color: #4a90e2;
+  margin-top: 0.5rem;
+}
