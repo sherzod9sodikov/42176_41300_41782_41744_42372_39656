@@ -14,7 +14,22 @@ exports.signup = async (req, res) => {
       return res.status(409).json({ message: "Email already in use" });
 
     const user = await User.create(req.body);
-    await Account.create({ userId: user._id, balance: 1000 });
+
+    await Account.create({
+      userId: user._id,
+      balances: {
+        USD: 1000,
+        EUR: 0,
+        GBP: 0,
+        INR: 0,
+        JPY: 0,
+        UZS: 0,
+        CAD: 0,
+        AUD: 0,
+        CHF: 0,
+        CNY: 0,
+      },
+    });
 
     const token = jwt.sign({ userId: user._id }, JWT_SECRET);
     res.status(201).json({ message: "User registered", token });

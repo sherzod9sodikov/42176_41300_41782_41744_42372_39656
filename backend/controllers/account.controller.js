@@ -6,14 +6,14 @@ exports.getBalance = async (req, res) => {
     const account = await Account.findOne({ userId: req.userId });
     if (!account) return res.status(404).json({ message: "Account not found" });
 
-    res.status(200).json({ balance: account.balance });
+    res.status(200).json({ balances: account.balances });
   } catch {
     res.status(500).json({ message: "Failed to fetch balance" });
   }
 };
 
 exports.transfer = async (req, res) => {
-  const { to, amount } = req.body;
+  const { to, currency, amount } = req.body;
   const session = await mongoose.startSession();
   session.startTransaction();
 
@@ -21,7 +21,7 @@ exports.transfer = async (req, res) => {
     const sender = await Account.findOne({ userId: req.userId }).session(
       session
     );
-    if (!sender || sender.balance < amount) {
+    if (!sender || (sender.balances[currency] ?? 0) < amount) {
       await session.abortTransaction();
       return res
         .status(400)
@@ -34,13 +34,15 @@ exports.transfer = async (req, res) => {
       return res.status(404).json({ message: "Receiver not found" });
     }
 
+    // Perform same-currency transfer
     await Account.updateOne(
       { userId: req.userId },
-      { $inc: { balance: -amount } }
+      { $inc: { [`balances.${currency}`]: -amount } }
     ).session(session);
+
     await Account.updateOne(
       { userId: to },
-      { $inc: { balance: amount } }
+      { $inc: { [`balances.${currency}`]: amount } }
     ).session(session);
 
     await session.commitTransaction();
@@ -48,6 +50,42 @@ exports.transfer = async (req, res) => {
   } catch (error) {
     await session.abortTransaction();
     res.status(500).json({ message: "Transfer failed", error: error.message });
+  } finally {
+    session.endSession();
+  }
+};
+
+exports.exchange = async (req, res) => {
+  const { fromCurrency, toCurrency, fromAmount, toAmount } = req.body;
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    const account = await Account.findOne({ userId: req.userId }).session(
+      session
+    );
+    if (!account || (account.balances[fromCurrency] ?? 0) < fromAmount) {
+      await session.abortTransaction();
+      return res
+        .status(400)
+        .json({ message: "Insufficient funds or account not found" });
+    }
+
+    await Account.updateOne(
+      { userId: req.userId },
+      {
+        $inc: {
+          [`balances.${fromCurrency}`]: -fromAmount,
+          [`balances.${toCurrency}`]: toAmount,
+        },
+      }
+    ).session(session);
+
+    await session.commitTransaction();
+    res.status(200).json({ message: "Exchange successful" });
+  } catch (error) {
+    await session.abortTransaction();
+    res.status(500).json({ message: "Exchange failed", error: error.message });
   } finally {
     session.endSession();
   }
