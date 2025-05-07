@@ -8,17 +8,24 @@ const userSchema = new mongoose.Schema({
   lastName: { type: String, required: true },
 });
 
-// Account Schema
+// Account Schema with balances per currency
 const accountSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
     required: true,
   },
-  balance: {
-    type: Number,
-    required: true,
-    default: 0,
+  balances: {
+    USD: { type: Number, default: 0 },
+    EUR: { type: Number, default: 0 },
+    GBP: { type: Number, default: 0 },
+    INR: { type: Number, default: 0 },
+    JPY: { type: Number, default: 0 },
+    UZS: { type: Number, default: 0 },
+    CAD: { type: Number, default: 0 },
+    AUD: { type: Number, default: 0 },
+    CHF: { type: Number, default: 0 },
+    CNY: { type: Number, default: 0 },
   },
 });
 
