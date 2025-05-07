@@ -16,7 +16,7 @@ const currencies = [
   "CNY",
 ];
 
-const REACT_APP_CURRENCY_API_KEY = "d36f5d8d74a53234bf0d0aa5dc69b94d";
+const API_KEY = "d36f5d8d74a53234bf0d0aa5dc69b94d";
 
 const ExchangePage = () => {
   const [fromCurrency, setFromCurrency] = useState("USD");
@@ -28,12 +28,16 @@ const ExchangePage = () => {
 
   const convert = async () => {
     try {
-      const API_KEY = REACT_APP_CURRENCY_API_KEY;
       const res = await fetch(
         `https://api.exchangerate.host/convert?access_key=${API_KEY}&from=${fromCurrency}&to=${toCurrency}&amount=${amount}`
       );
       const data = await res.json();
-      console.log("Convert response:", data);
+
+      if (data?.error?.type === "rate_limit_reached") {
+        alert("Rate limit reached. Try a smaller amount.");
+        setConverted("N/A");
+        return;
+      }
 
       if (typeof data.result === "number") {
         setConverted(data.result.toFixed(4));
@@ -43,6 +47,23 @@ const ExchangePage = () => {
     } catch (err) {
       console.error("Conversion error:", err);
       setConverted("Error");
+    }
+  };
+
+  const handleExchange = async () => {
+    try {
+      const res = await API.post("/account/exchange", {
+        fromCurrency,
+        toCurrency,
+        fromAmount: parseFloat(amount),
+        toAmount: parseFloat(converted),
+      });
+
+      alert(res.data.message || "Exchange successful");
+      navigate("/dashboard");
+    } catch (err) {
+      console.error("Exchange failed:", err.response?.data || err.message);
+      alert("Exchange failed. Please try again.");
     }
   };
 
@@ -56,29 +77,25 @@ const ExchangePage = () => {
 
       <div className="exchange-form">
         <div className="input-group">
-          <label>From:</label>
+          <label>From Currency:</label>
           <select
             value={fromCurrency}
             onChange={(e) => setFromCurrency(e.target.value)}
           >
             {currencies.map((cur) => (
-              <option key={cur} value={cur}>
-                {cur}
-              </option>
+              <option key={cur}>{cur}</option>
             ))}
           </select>
         </div>
 
         <div className="input-group">
-          <label>To:</label>
+          <label>To Currency:</label>
           <select
             value={toCurrency}
             onChange={(e) => setToCurrency(e.target.value)}
           >
             {currencies.map((cur) => (
-              <option key={cur} value={cur}>
-                {cur}
-              </option>
+              <option key={cur}>{cur}</option>
             ))}
           </select>
         </div>
@@ -92,16 +109,25 @@ const ExchangePage = () => {
             min="0.01"
           />
         </div>
-      </div>
 
-      <div className="exchange-result">
-        <h3>Converted Amount:</h3>
-        <div className="converted-value">
-          {converted !== null ? `${converted} ${toCurrency}` : "..."}
+        <div className="exchange-result">
+          <h3>Converted Amount:</h3>
+          <div className="converted-value">
+            {converted !== null ? `${converted} ${toCurrency}` : "..."}
+          </div>
+        </div>
+
+        <div className="button-group">
+          <button onClick={convert}>Convert</button>
+          <button
+            onClick={handleExchange}
+            disabled={!converted || isNaN(converted)}
+          >
+            Exchange and Save
+          </button>
+          <button onClick={() => navigate("/dashboard")}>Go Back</button>
         </div>
       </div>
-
-      <button onClick={() => navigate("/dashboard")}>Go Back</button>
     </div>
   );
 };

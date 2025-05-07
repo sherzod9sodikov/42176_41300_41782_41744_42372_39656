@@ -1,0 +1,24 @@
+.history-page {
+  max-width: 800px;
+  margin: 5vh auto;
+  padding: 2rem;
+  /* background: #fff; */
+  border-radius: 12px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.history-table th,
+.history-table td {
+  padding: 0.75rem;
+  /* border-bottom: 1px solid #ccc; */
+  text-align: left;
+}
+
+.history-table th {
+  /* background-color: #f4f4f4; */
+}
