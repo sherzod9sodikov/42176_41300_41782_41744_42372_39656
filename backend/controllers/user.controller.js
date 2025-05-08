@@ -32,7 +32,9 @@ exports.signup = async (req, res) => {
     });
 
     const token = jwt.sign({ userId: user._id }, JWT_SECRET);
-    res.status(201).json({ message: "User registered", token });
+    res
+      .status(201)
+      .json({ message: "User registered", token, userId: user._id });
   } catch (err) {
     res.status(500).json({ message: "Signup failed", error: err.message });
   }
