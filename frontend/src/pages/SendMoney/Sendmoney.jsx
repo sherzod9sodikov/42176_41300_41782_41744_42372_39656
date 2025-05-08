@@ -81,8 +81,9 @@ const SendMoney = () => {
           <div className="modal-content">
             <h3>Transfer to {selectedUser.firstName}</h3>
 
-            <label>Currency:</label>
+            <label htmlFor="currency">Currency:</label>
             <select
+              id="currency"
               value={currency}
               onChange={(e) => setCurrency(e.target.value)}
             >
@@ -93,8 +94,9 @@ const SendMoney = () => {
               ))}
             </select>
 
-            <label>Amount:</label>
+            <label htmlFor="amount">Amount:</label>
             <input
+              id="amount"
               type="number"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
