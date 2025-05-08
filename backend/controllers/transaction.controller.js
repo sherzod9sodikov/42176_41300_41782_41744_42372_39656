@@ -4,11 +4,18 @@ exports.getTransactionHistory = async (req, res) => {
   try {
     const transactions = await Transaction.find({ userId: req.userId })
       .populate("userId", "firstName lastName")
+      .populate("targetId", "firstName lastName")
       .sort({ date: -1 });
 
-    // Add computed `targetName` if needed
     const formatted = transactions.map((tx) => ({
-      ...tx._doc,
+      _id: tx._id,
+      type: tx.type,
+      amount: tx.amount,
+      currency: tx.currency,
+      date: tx.date,
+      senderName: tx.userId
+        ? `${tx.userId.firstName} ${tx.userId.lastName}`
+        : "-",
       targetName: tx.targetId
         ? `${tx.targetId.firstName} ${tx.targetId.lastName}`
         : tx.targetName || "-",
