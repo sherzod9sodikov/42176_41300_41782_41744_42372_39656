@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
-const { Account } = require("../models");
+const { Account, User } = require("../models");
+const Transaction = require("../models/transactionModel");
 
 exports.getBalance = async (req, res) => {
   try {
@@ -29,12 +30,12 @@ exports.transfer = async (req, res) => {
     }
 
     const receiver = await Account.findOne({ userId: to }).session(session);
-    if (!receiver) {
+    const receiverUser = await User.findById(to);
+    if (!receiver || !receiverUser) {
       await session.abortTransaction();
       return res.status(404).json({ message: "Receiver not found" });
     }
 
-    // Perform same-currency transfer
     await Account.updateOne(
       { userId: req.userId },
       { $inc: { [`balances.${currency}`]: -amount } }
@@ -44,6 +45,21 @@ exports.transfer = async (req, res) => {
       { userId: to },
       { $inc: { [`balances.${currency}`]: amount } }
     ).session(session);
+
+    await Transaction.create(
+      [
+        {
+          userId: req.userId,
+          type: "send",
+          amount,
+          currency,
+          targetId: to,
+          targetName: `${receiverUser.firstName} ${receiverUser.lastName}`,
+          date: new Date(),
+        },
+      ],
+      { session }
+    );
 
     await session.commitTransaction();
     res.status(200).json({ message: "Transfer successful" });
@@ -80,6 +96,20 @@ exports.exchange = async (req, res) => {
         },
       }
     ).session(session);
+
+    await Transaction.create(
+      [
+        {
+          userId: req.userId,
+          type: "exchange",
+          amount: fromAmount,
+          currency: fromCurrency,
+          targetName: `→ ${toCurrency}`,
+          date: new Date(),
+        },
+      ],
+      { session }
+    );
 
     await session.commitTransaction();
     res.status(200).json({ message: "Exchange successful" });
