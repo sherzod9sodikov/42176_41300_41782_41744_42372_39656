@@ -5,18 +5,30 @@ import "./TransactionHistory.css";
 
 const TransactionHistory = () => {
   const [history, setHistory] = useState([]);
+  const [selectedTx, setSelectedTx] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchHistory = async () => {
-      try {
-        const res = await API.get("/account/history");
-        setHistory(res.data.transactions || []);
-      } catch (err) {
-        console.error("Failed to fetch transaction history", err);
-      }
-    };
+  const fetchHistory = async () => {
+    try {
+      const res = await API.get("/transaction/history");
+      setHistory(res.data.transactions || []);
+    } catch (err) {
+      console.error("Failed to fetch transaction history", err);
+    }
+  };
 
+  const openModal = async (id) => {
+    try {
+      const res = await API.get(`/transaction/history/${id}`);
+      setSelectedTx(res.data.transaction);
+      setModalVisible(true);
+    } catch (err) {
+      console.error("Failed to fetch transaction", err);
+    }
+  };
+
+  useEffect(() => {
     fetchHistory();
   }, []);
 
@@ -38,7 +50,11 @@ const TransactionHistory = () => {
           </thead>
           <tbody>
             {history.map((tx, i) => (
-              <tr key={i}>
+              <tr
+                key={i}
+                onClick={() => openModal(tx._id)}
+                className="clickable-row"
+              >
                 <td>{new Date(tx.date).toLocaleString()}</td>
                 <td>{tx.type}</td>
                 <td>{tx.amount}</td>
@@ -48,6 +64,32 @@ const TransactionHistory = () => {
             ))}
           </tbody>
         </table>
+      )}
+
+      {modalVisible && selectedTx && (
+        <div className="modal">
+          <div className="modal-content">
+            <h3>Transaction Details</h3>
+            <p>
+              <strong>Type:</strong> {selectedTx.type}
+            </p>
+            <p>
+              <strong>Amount:</strong> {selectedTx.amount} {selectedTx.currency}
+            </p>
+            <p>
+              <strong>Date:</strong>{" "}
+              {new Date(selectedTx.date).toLocaleString()}
+            </p>
+            <p>
+              <strong>Sender:</strong> {selectedTx.senderName}
+            </p>
+            <p>
+              <strong>Receiver:</strong> {selectedTx.targetName}
+            </p>
+
+            <button onClick={() => setModalVisible(false)}>Close</button>
+          </div>
+        </div>
       )}
 
       <button className="back-btn" onClick={() => navigate("/dashboard")}>
